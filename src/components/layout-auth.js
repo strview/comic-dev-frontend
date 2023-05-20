@@ -15,6 +15,7 @@ import {
         } from "react-router-dom"
 import { styled, useTheme } from '@mui/material/styles'
 
+import getUserPool from '../helpers/UserPool'
 import PageOne from '../pages/auth/page-one'
 import PageTwo from '../pages/auth/page-two'
 
@@ -122,6 +123,7 @@ useEffect(() => {
   const logout = () => {
     setUser(null)
     localStorage.removeItem("user")
+    getUserPool().getCurrentUser().signOut()
   }
 
   return (

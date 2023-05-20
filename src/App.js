@@ -11,7 +11,7 @@ function App() {
   const [mode, setMode] = React.useState('dark')
   // const [user, setUser] = React.useState(null)
   const tempUser = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null
-  console.log(tempUser)
+  // console.log(tempUser)
   const [user, setUser] = React.useState(tempUser)
 
 

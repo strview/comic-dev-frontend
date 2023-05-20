@@ -1,22 +1,52 @@
-// react component for the login form
-import { Box, Button, Checkbox, Container, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material'
 import React from 'react'
+import { Box, Button, Checkbox, Container, FormControlLabel, Grid, Link, TextField, Typography } from '@mui/material'
+//import UserPool from '../../helpers/UserPool'
+import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js'
+//import UserPool from '../../helpers/UserPool'
+import getUserPool from '../../helpers/UserPool'
+
 
 const LoginForm = ({user, setUser}) => {
     const handleSubmit = (event) => {
         event.preventDefault()
         const data = new FormData(event.currentTarget)
-        //{username : 'testuser', email : 'test@test.com', role : 'admin', loggedIn : false}
-        const tempUser = {
-          username: 'testuser',
-          email: data.get("email"),
-          password: data.get("password"),
-          role : 'admin',
-          loggedIn : true
-        }
-        console.log(tempUser)
-        setUser(tempUser)
-        localStorage.setItem('user', JSON.stringify(tempUser))
+        // const poolData = {
+        //   UserPoolId: "us-east-1_cDKzDttnN",
+        //   ClientId: "34u1vp1i2ovedjetg0133elivg"
+        // }
+        // const UserPool = new CognitoUserPool(poolData)
+        const UserPool = getUserPool()
+        const cognitoUser = new CognitoUser({
+          Username: data.get("email"),
+          Pool: UserPool,
+        })
+        const authDetails = new AuthenticationDetails({
+          Username: data.get("email"),
+          Password: data.get("password"),
+        })
+        cognitoUser.authenticateUser(authDetails, {
+          onSuccess: (data) => {
+            console.log("onSuccess:", data)
+            const tempUser = {
+              username: data.idToken.payload["cognito:username"],
+              email: data.idToken.payload.email,
+              role : data.idToken.payload["custom:role"],
+              groups : data.idToken.payload["cognito:groups"],
+              test : "test",
+              loggedIn : true
+            } 
+            setUser(tempUser)
+            localStorage.setItem('user', JSON.stringify(tempUser))
+          },
+          onFailure: (err) => {
+            console.error("onFailure:", err)
+          },
+          newPasswordRequired: (data) => {
+            console.log("newPasswordRequired:", data)
+            cognitoUser.completeNewPasswordChallenge("NewPassword1", {})
+          },
+        })
+
       }
     
       return (
